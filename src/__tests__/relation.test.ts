@@ -1,5 +1,6 @@
 import KodzeroToValidnoParser from '../KodzeroToValidnoParser.js';
 import { TableField, TableFieldAny } from '../kz-schema-factory/types.js';
+import { ObjectId } from 'bson';
 
 describe('KodzeroToValidnoParser: relation', () => {
     it('should parse basic relation field without specs', () => {
@@ -21,7 +22,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.basicRelation.type).toBe(String)
         expect(parsed.basicRelation.rules).toBeDefined()
@@ -46,7 +47,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.requiredRelation.type).toBe(String)
     })
@@ -70,7 +71,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.singleRelation.type).toBe(String)
         expect(parsed.singleRelation.rules).toBeDefined()
@@ -95,7 +96,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.multipleRelation.type).toBe(Array)
         expect(parsed.multipleRelation.rules?.eachType).toBe(String)
@@ -122,7 +123,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.requiredSingleRelation.type).toBe(String)
     })
@@ -146,7 +147,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.requiredMultipleRelation.type).toBe(Array)
         expect(parsed.requiredMultipleRelation.rules?.custom).toBeDefined()
@@ -173,7 +174,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.optionalMultipleRelation.rules?.custom).toBeDefined()
         expect(typeof parsed.optionalMultipleRelation.rules?.custom).toBe('function')
@@ -215,7 +216,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.userRelation.type).toBe(String)
         expect(parsed.categoryRelation.type).toBe(String)
@@ -285,7 +286,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         // Optional Single
         expect(parsed.optionalSingleRelation.type).toBe(String)
@@ -326,7 +327,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         expect(parsed.emptyCollectionRelation.type).toBe(String)
     })
@@ -350,7 +351,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         // Should be Array with eachType, isNot, and custom rules
         expect(parsed.tags.type).toBe(Array)
@@ -378,7 +379,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         // Should have String type with no rules
         expect(parsed.defaultRelation.type).toBe(String)
@@ -404,7 +405,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
         const customValidator = parsed.tags.rules?.custom
 
         // Valid: all IDs are 24 characters
@@ -442,7 +443,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
         const customValidator = parsed.optionalTags.rules?.custom
 
         // Empty array should be valid when mayBeEmpty is true
@@ -475,7 +476,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
         const customValidator = parsed.requiredTags.rules?.custom
 
         // Empty array passes custom validator (ID format check)
@@ -503,7 +504,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             },
         ]
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
         const customValidator = parsed.tags.rules?.custom
 
         // Multiple valid IDs
@@ -527,5 +528,346 @@ describe('KodzeroToValidnoParser: relation', () => {
         const allInvalidResult = customValidator(['abc', '123', 'xyz'], {})
         expect(allInvalidResult.result).toBe(false)
         expect(allInvalidResult.details).toBe('One or more IDs are invalid')
+    })
+
+    describe('relationAsObjectId option (backend mode)', () => {
+        it('should parse single relation as ObjectId when relationAsObjectId is true', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'singleRelation',
+                        type: 'relation',
+                        title: 'Single Relation',
+                        specs: {
+                            collection: 'users',
+                            multiple: false,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
+
+            expect(parsed.singleRelation.type).toBe(ObjectId)
+            expect(parsed.singleRelation.rules).toBeDefined()
+            expect(parsed.singleRelation.rules.custom).toBeDefined()
+        })
+
+        it('should parse multiple relation with ObjectId eachType when relationAsObjectId is true', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'multipleRelation',
+                        type: 'relation',
+                        title: 'Multiple Relation',
+                        specs: {
+                            collection: 'tags',
+                            multiple: true,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
+
+            expect(parsed.multipleRelation.type).toBe(Array)
+            expect(parsed.multipleRelation.rules?.eachType).toBe(ObjectId)
+            expect(parsed.multipleRelation.rules?.custom).toBeDefined()
+        })
+
+        it('should default to ObjectId when relationAsObjectId option is not provided', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'defaultRelation',
+                        type: 'relation',
+                        title: 'Default Relation',
+                        specs: {
+                            collection: 'users',
+                            multiple: false,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+
+            // Should default to ObjectId (backend mode)
+            expect(parsed.defaultRelation.type).toBe(ObjectId)
+        })
+
+        it('should handle required single relation as ObjectId', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'requiredRelation',
+                        type: 'relation',
+                        title: 'Required Relation',
+                        specs: {
+                            collection: 'organizations',
+                            multiple: false,
+                            mayBeEmpty: false,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
+
+            expect(parsed.requiredRelation.type).toBe(ObjectId)
+            expect(parsed.requiredRelation.rules.custom).toBeDefined()
+        })
+
+        it('should handle required multiple relation as ObjectId array', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'requiredTags',
+                        type: 'relation',
+                        title: 'Required Tags',
+                        specs: {
+                            collection: 'tags',
+                            multiple: true,
+                            mayBeEmpty: false,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
+
+            expect(parsed.requiredTags.type).toBe(Array)
+            expect(parsed.requiredTags.rules?.eachType).toBe(ObjectId)
+            expect(parsed.requiredTags.rules?.custom).toBeDefined()
+        })
+    })
+
+    describe('relationAsObjectId option set to false (frontend mode)', () => {
+        it('should parse single relation as String when relationAsObjectId is false', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'singleRelation',
+                        type: 'relation',
+                        title: 'Single Relation',
+                        specs: {
+                            collection: 'users',
+                            multiple: false,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+
+            expect(parsed.singleRelation.type).toBe(String)
+            expect(parsed.singleRelation.rules).toBeDefined()
+            expect(parsed.singleRelation.rules.custom).toBeDefined()
+        })
+
+        it('should parse multiple relation with String eachType when relationAsObjectId is false', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'multipleRelation',
+                        type: 'relation',
+                        title: 'Multiple Relation',
+                        specs: {
+                            collection: 'tags',
+                            multiple: true,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+
+            expect(parsed.multipleRelation.type).toBe(Array)
+            expect(parsed.multipleRelation.rules?.eachType).toBe(String)
+            expect(parsed.multipleRelation.rules?.custom).toBeDefined()
+        })
+
+        it('should handle required single relation as String', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'requiredRelation',
+                        type: 'relation',
+                        title: 'Required Relation',
+                        specs: {
+                            collection: 'organizations',
+                            multiple: false,
+                            mayBeEmpty: false,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+
+            expect(parsed.requiredRelation.type).toBe(String)
+            expect(parsed.requiredRelation.rules.custom).toBeDefined()
+        })
+
+        it('should handle required multiple relation as String array', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'requiredTags',
+                        type: 'relation',
+                        title: 'Required Tags',
+                        specs: {
+                            collection: 'tags',
+                            multiple: true,
+                            mayBeEmpty: false,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+
+            expect(parsed.requiredTags.type).toBe(Array)
+            expect(parsed.requiredTags.rules?.eachType).toBe(String)
+            expect(parsed.requiredTags.rules?.custom).toBeDefined()
+        })
+
+        it('should handle optional multiple relation as String array', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'optionalTags',
+                        type: 'relation',
+                        title: 'Optional Tags',
+                        specs: {
+                            collection: 'tags',
+                            multiple: true,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+
+            expect(parsed.optionalTags.type).toBe(Array)
+            expect(parsed.optionalTags.rules?.eachType).toBe(String)
+            expect(parsed.optionalTags.rules?.custom).toBeDefined()
+        })
+    })
+
+    describe('validation consistency across modes', () => {
+        it('should validate 24-character IDs correctly in both String and ObjectId modes', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'singleRelation',
+                        type: 'relation',
+                        title: 'Single Relation',
+                        specs: {
+                            collection: 'users',
+                            multiple: false,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsedAsString = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+            const parsedAsObjectId = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
+
+            const validatorString = parsedAsString.singleRelation.rules?.custom
+            const validatorObjectId = parsedAsObjectId.singleRelation.rules?.custom
+
+            const validId = '507f1f77bcf86cd799439011'
+            const invalidId = 'short'
+
+            // Both modes should accept valid 24-char IDs
+            expect(validatorString(validId, {}).result).toBe(true)
+            expect(validatorObjectId(validId, {}).result).toBe(true)
+
+            // Both modes should reject invalid IDs
+            expect(validatorString(invalidId, {}).result).toBe(false)
+            expect(validatorObjectId(invalidId, {}).result).toBe(false)
+        })
+
+        it('should validate multiple relations consistently in both modes', () => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'multipleRelation',
+                        type: 'relation',
+                        title: 'Multiple Relation',
+                        specs: {
+                            collection: 'tags',
+                            multiple: true,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsedAsString = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
+            const parsedAsObjectId = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
+
+            const validatorString = parsedAsString.multipleRelation.rules?.custom
+            const validatorObjectId = parsedAsObjectId.multipleRelation.rules?.custom
+
+            const validIds = ['507f1f77bcf86cd799439011', '507f191e810c19729de860ea']
+            const invalidIds = ['507f1f77bcf86cd799439011', 'short']
+
+            // Both modes should accept valid IDs
+            expect(validatorString(validIds, {}).result).toBe(true)
+            expect(validatorObjectId(validIds, {}).result).toBe(true)
+
+            // Both modes should reject arrays with invalid IDs
+            expect(validatorString(invalidIds, {}).result).toBe(false)
+            expect(validatorObjectId(invalidIds, {}).result).toBe(false)
+
+            // Both modes should allow empty arrays when mayBeEmpty is true
+            expect(validatorString([], {}).result).toBe(true)
+            expect(validatorObjectId([], {}).result).toBe(true)
+        })
     })
 })

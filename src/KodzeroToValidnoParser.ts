@@ -1,4 +1,6 @@
 import { validations } from 'validno'
+import {ObjectId} from 'bson'
+
 import isValidJSON from './utils/is-valid-json.js'
 // Types
 import type { TableField, TableFieldAny } from './kz-schema-factory/types.js'
@@ -13,6 +15,14 @@ import type TableFieldSelect from './kz-schema-factory/types-constructors/select
 import TableFieldRelation from './kz-schema-factory/types-constructors/relation.js'
 
 const defaultKeys = ['_id', 'createdAt', 'updatedAt']
+
+interface ParseSchemaOptions {
+  relationAsObjectId?: boolean
+}
+
+const getDefaultOptions = (): ParseSchemaOptions  => ({
+  relationAsObjectId: true,
+})
 
 class KodzeroToValidnoParser {
   static parseString(field: TableField<TableFieldString>) {
@@ -367,9 +377,11 @@ class KodzeroToValidnoParser {
     return output
   }
 
-  static parseRelation(field: TableField<TableFieldRelation>) {
+  static parseRelation(field: TableField<TableFieldRelation>, options: ParseSchemaOptions) {
+    const relationAsObjectId = options.relationAsObjectId ?? true
+
     const output: {
-      type: StringConstructor | ArrayConstructor;
+      type: StringConstructor | ArrayConstructor | typeof ObjectId;
       rules?: Record<string, unknown>
     } = { type: String }
 
@@ -377,7 +389,7 @@ class KodzeroToValidnoParser {
 
     if (field.item.specs.multiple) {
       output.type = Array
-      output.rules.eachType = String
+      output.rules.eachType = relationAsObjectId ? ObjectId : String
       output.rules.custom = (value: string[], {}) => {
         if (field.item.specs.mayBeEmpty && Array.isArray(value) && value.length === 0) {
           return {
@@ -394,17 +406,19 @@ class KodzeroToValidnoParser {
         }
       }
     } else {
-      output.type = String
+      output.type = relationAsObjectId ? ObjectId : String
 
-      output.rules.custom = (value: string, {}) => {
-        if (field.item.specs.mayBeEmpty && (typeof value === 'string' && value.length === 0)) {
+      output.rules.custom = (value: string | ObjectId, {}) => {
+        const valueAsString = typeof value === 'string' ? value : value.toString()
+
+        if (field.item.specs.mayBeEmpty && (typeof valueAsString === 'string' && valueAsString.length === 0)) {
           return {
             result: true,
             details: '',
           }
         }
 
-        const stringLength24 = typeof value === 'string' && value.length === 24
+        const stringLength24 = typeof valueAsString === 'string' && valueAsString.length === 24
 
         return {
           result: stringLength24,
@@ -413,11 +427,12 @@ class KodzeroToValidnoParser {
       }
     }
 
-    console.log(output)
     return output
   }
 
-  static parseSchema(schemaDb: TableField<TableFieldAny>[]): unknown {
+  static parseSchema(schemaDb: TableField<TableFieldAny>[], parsesOptions?: ParseSchemaOptions): unknown {
+    const options = { ...getDefaultOptions(), ...parsesOptions }
+
     const schema: Record<string, unknown> = {}
     const schemaFiltered = schemaDb.filter(
       (field) => field.item.key && !defaultKeys.includes(field.item.key),
@@ -453,7 +468,7 @@ class KodzeroToValidnoParser {
           schema[key] = KodzeroToValidnoParser.parseSelect(field as TableField<TableFieldSelect>)
           break
         case 'relation':
-          schema[key] = KodzeroToValidnoParser.parseRelation(field as TableField<TableFieldRelation>)
+          schema[key] = KodzeroToValidnoParser.parseRelation(field as TableField<TableFieldRelation>, options)
           break
         default:
           break
