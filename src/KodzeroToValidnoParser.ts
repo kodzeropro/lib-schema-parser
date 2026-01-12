@@ -390,6 +390,7 @@ class KodzeroToValidnoParser {
     if (field.item.specs.multiple) {
       output.type = Array
       output.rules.eachType = relationAsObjectId ? ObjectId : String
+      
       output.rules.custom = (value: string[], {}) => {
         if (field.item.specs.mayBeEmpty && Array.isArray(value) && value.length === 0) {
           return {
@@ -398,7 +399,7 @@ class KodzeroToValidnoParser {
           }
         }
 
-        const allStringsLength24 = value.every((v) => typeof v === 'string' && v.length === 24)
+        const allStringsLength24 = value.every((v: any) => ObjectId.isValid(v))
 
         return {
           result: allStringsLength24,
