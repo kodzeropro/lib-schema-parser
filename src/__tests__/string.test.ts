@@ -52,7 +52,7 @@ describe('KodzeroToValidnoParser: string', () => {
         ]
 
         const validnoSchema = {
-            minLengthString: { type: String, rules: { minlength: 5 } },
+            minLengthString: { type: String, rules: { lengthMin: 5 } },
         }
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema);
@@ -81,7 +81,7 @@ describe('KodzeroToValidnoParser: string', () => {
         ]
 
         const validnoSchema = {
-            maxLengthString: { type: String, rules: { maxlength: 100 } },
+            maxLengthString: { type: String, rules: { lengthMax: 100 } },
         }
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema);
@@ -110,7 +110,7 @@ describe('KodzeroToValidnoParser: string', () => {
         ]
 
         const validnoSchema = {
-            boundedString: { type: String, rules: { minlength: 5, maxlength: 50 } },
+            boundedString: { type: String, rules: { lengthMin: 5, lengthMax: 50 } },
         }
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema);
@@ -200,8 +200,8 @@ describe('KodzeroToValidnoParser: string', () => {
             fullSpecString: { 
                 type: String, 
                 rules: { 
-                    maxlength: 20, 
-                    minlength: 3, 
+                    lengthMax: 20, 
+                    lengthMin: 3, 
                     regex: /^[a-zA-Z0-9]+$/, 
                     lengthNot: 0 
                 } 
@@ -267,7 +267,7 @@ describe('KodzeroToValidnoParser: string', () => {
 
         const validnoSchema = {
             basicString: { type: String },
-            requiredString: { type: String, rules: { minlength: 1, maxlength: 100, lengthNot: 0 } },
+            requiredString: { type: String, rules: { lengthMin: 1, lengthMax: 100, lengthNot: 0 } },
             patternString: { type: String, rules: { regex: /^\d{3}-\d{2}-\d{4}$/ } },
         }
 

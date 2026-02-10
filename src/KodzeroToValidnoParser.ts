@@ -41,11 +41,11 @@ class KodzeroToValidnoParser {
       output.rules = {}
 
       if (specs.lengthMax) {
-        output.rules.maxlength = field.item.specs.lengthMax
+        output.rules.lengthMax = field.item.specs.lengthMax
       }
 
       if (specs.lengthMin) {
-        output.rules.minlength = field.item.specs.lengthMin
+        output.rules.lengthMin = field.item.specs.lengthMin
       }
 
       if (specs.pattern && typeof field.item.specs.pattern === 'string') {
