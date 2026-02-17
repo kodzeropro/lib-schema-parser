@@ -11,6 +11,7 @@
     "tscw": "tsc --b --watch src/",
     "dev": "nodemon dist/dev.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "prepublishOnly": "npm run tsc"
   },
   "files": [
