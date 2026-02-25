@@ -391,7 +391,7 @@ class KodzeroToValidnoParser {
       output.type = Array
       output.rules.eachType = relationAsObjectId ? ObjectId : String
       
-      output.rules.custom = (value: string[], {}) => {
+      output.rules.custom = (value: unknown, {}) => {
         if (field.item.specs.mayBeEmpty && Array.isArray(value) && value.length === 0) {
           return {
             result: true,
@@ -399,7 +399,7 @@ class KodzeroToValidnoParser {
           }
         }
 
-        const allStringsLength24 = value.every((v: any) => ObjectId.isValid(v))
+        const allStringsLength24 = Array.isArray(value) && value.every((v: any) => ObjectId.isValid(v))
 
         return {
           result: allStringsLength24,
@@ -409,9 +409,12 @@ class KodzeroToValidnoParser {
     } else {
       output.type = relationAsObjectId ? ObjectId : String
 
-      output.rules.custom = (value: string | ObjectId, {}) => {
+      output.rules.custom = (value: unknown, {}) => {
         if (value === null || value === undefined) {
-          return {result: false, details: 'ID is invalid'} 
+          return {
+            result: false,
+            details: 'ID is invalid'
+          } 
         }
         
         const valueAsString = typeof value === 'string' ? value : value.toString()
