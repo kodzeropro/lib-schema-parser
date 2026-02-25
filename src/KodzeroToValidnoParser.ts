@@ -410,6 +410,10 @@ class KodzeroToValidnoParser {
       output.type = relationAsObjectId ? ObjectId : String
 
       output.rules.custom = (value: string | ObjectId, {}) => {
+        if (value === null || value === undefined) {
+          return {result: false, details: 'ID is invalid'} 
+        }
+        
         const valueAsString = typeof value === 'string' ? value : value.toString()
 
         if (field.item.specs.mayBeEmpty && (typeof valueAsString === 'string' && valueAsString.length === 0)) {
