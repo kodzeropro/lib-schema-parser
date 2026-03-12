@@ -136,7 +136,7 @@ describe('KodzeroToValidnoParser: select', () => {
                 rules: { 
                     eachType: String, 
                     enum: ['option1', 'option2', 'option3'],
-                    isNot: ''
+                    lengthNot: 0
                 } 
             },
         }
@@ -287,7 +287,7 @@ describe('KodzeroToValidnoParser: select', () => {
                 rules: { 
                     eachType: String, 
                     enum: ['tech', 'business', 'lifestyle', 'entertainment'],
-                    isNot: ''
+                    lengthNot: 0
                 } 
             },
         }
@@ -507,5 +507,40 @@ describe('KodzeroToValidnoParser: select', () => {
         expect(parsed.optionalSelect.rules?.enum).toContain('value1')
         expect(parsed.optionalSelect.rules?.enum).toContain('value2')
         expect(parsed.optionalSelect.rules?.enum?.length).toBe(3)
+    })
+
+    it('should reject empty array for multiple select when mayBeEmpty is false', () => {
+        const kodzeroSchema: TableField<TableFieldAny>[] = [
+            {
+                id: 'xxx',
+                order: 1,
+                isAuto: false,
+                item: {
+                    key: 'requiredMultiSelect',
+                    type: 'select',
+                    title: 'Required Multi Select',
+                    specs: {
+                        multiple: true,
+                        mayBeEmpty: false,
+                        allowedValues: ['option1', 'option2', 'option3'],
+                    }
+                }
+            },
+        ]
+
+        const validnoSchema = {
+            requiredMultiSelect: { 
+                type: Array, 
+                rules: { 
+                    eachType: String, 
+                    enum: ['option1', 'option2', 'option3'],
+                    lengthNot: 0
+                } 
+            },
+        }
+
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema);
+
+        expect(validnoSchema).toEqual(parsed)
     })
 })

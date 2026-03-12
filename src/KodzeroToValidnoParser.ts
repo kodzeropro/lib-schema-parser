@@ -345,13 +345,13 @@ class KodzeroToValidnoParser {
 
     output.rules = {}
 
-    if (specsPresent.mayBeEmpty) {
-      output.rules.isNot = ''
-    }
-
     if (field.item.specs.multiple) {
       output.type = Array
       output.rules.eachType = String
+
+      if (field.item.specs.mayBeEmpty === false) {
+        output.rules.lengthNot = 0
+      }
 
       if (
         Array.isArray(field.item.specs.allowedValues) &&
@@ -360,6 +360,10 @@ class KodzeroToValidnoParser {
         output.rules.enum = field.item.specs.allowedValues
       }
     } else {
+      if (field.item.specs.mayBeEmpty === false) {
+        output.rules.isNot = ''
+      }
+      
       if (
         Array.isArray(field.item.specs.allowedValues) &&
         field.item.specs.allowedValues.length > 0
@@ -367,12 +371,10 @@ class KodzeroToValidnoParser {
         output.rules.enum = field.item.specs.allowedValues
       }
 
-      if (specsPresent.mayBeEmpty) {
+      if (field.item.specs.mayBeEmpty === true) {
         if (!output.rules.enum) {
           output.rules.enum = []
         }
-
-        output.rules.lengthMin = 1
 
         ;(output.rules.enum as string[]).push('')
       }
