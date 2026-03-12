@@ -28,31 +28,31 @@ class KodzeroToValidnoParser {
   static parseString(field: TableField<TableFieldString>) {
     const output: { type: StringConstructor; rules?: Record<string, unknown> } = { type: String }
 
-    const specs = {
+    const specsPresent = {
       lengthMax: field.item.specs.lengthMax !== null,
       lengthMin: field.item.specs.lengthMin !== null,
       pattern: field.item.specs.pattern !== null,
       mayBeEmpty: field.item.specs.mayBeEmpty === false,
     }
 
-    const hasSpecs = Object.values(specs).some((v) => v === true)
+    const hasSpecs = Object.values(specsPresent).some((v) => v === true)
 
     if (hasSpecs) {
       output.rules = {}
 
-      if (specs.lengthMax) {
+      if (specsPresent.lengthMax) {
         output.rules.lengthMax = field.item.specs.lengthMax
       }
 
-      if (specs.lengthMin) {
+      if (specsPresent.lengthMin) {
         output.rules.lengthMin = field.item.specs.lengthMin
       }
 
-      if (specs.pattern && typeof field.item.specs.pattern === 'string') {
+      if (specsPresent.pattern && typeof field.item.specs.pattern === 'string') {
         output.rules.regex = new RegExp(field.item.specs.pattern)
       }
 
-      if (specs.mayBeEmpty) {
+      if (specsPresent.mayBeEmpty) {
         output.rules.lengthNot = 0
       }
     }
@@ -63,26 +63,26 @@ class KodzeroToValidnoParser {
   static parseNumber(field: TableField<TableFieldNumber>) {
     const output: { type: NumberConstructor; rules?: Record<string, unknown> } = { type: Number }
 
-    const specs = {
+    const specsPresent = {
       min: field.item.specs.min !== null,
       max: field.item.specs.max !== null,
       mayBeEmpty: field.item.specs.mayBeEmpty === false,
     }
 
-    const hasSpecs = Object.values(specs).some((v) => v === true)
+    const hasSpecs = Object.values(specsPresent).some((v) => v === true)
 
     if (hasSpecs) {
       output.rules = {}
 
-      if (specs.min) {
+      if (specsPresent.min) {
         output.rules.min = field.item.specs.min
       }
 
-      if (specs.max) {
+      if (specsPresent.max) {
         output.rules.max = field.item.specs.max
       }
 
-      if (specs.mayBeEmpty) {
+      if (specsPresent.mayBeEmpty) {
         output.rules.isNot = 0
       }
     }
@@ -93,16 +93,16 @@ class KodzeroToValidnoParser {
   static parseBoolean(field: TableField<TableFieldBoolean>) {
     const output: { type: BooleanConstructor; rules?: Record<string, unknown> } = { type: Boolean }
 
-    const specs = {
+    const specsPresent = {
       onlyTrue: field.item.specs.onlyTrue === true,
     }
 
-    const hasSpecs = Object.values(specs).some((v) => v === true)
+    const hasSpecs = Object.values(specsPresent).some((v) => v === true)
 
     if (hasSpecs) {
       output.rules = {}
 
-      if (specs.onlyTrue) {
+      if (specsPresent.onlyTrue) {
         output.rules.is = true
       }
     }
@@ -113,35 +113,35 @@ class KodzeroToValidnoParser {
   static parseDate(field: TableField<TableFieldDate>) {
     const output: { type: DateConstructor; rules?: Record<string, unknown> } = { type: Date }
 
-    const specs = {
+    const specsPresent = {
       min: field.item.specs.min !== null,
       max: field.item.specs.max !== null,
       mayBeEmpty: field.item.specs.mayBeEmpty === false,
     }
 
-    const hasSpecs = Object.values(specs).some((v) => v === true)
+    const hasSpecs = Object.values(specsPresent).some((v) => v === true)
 
     if (hasSpecs) {
       output.rules = {}
 
-      if (specs.mayBeEmpty) {
+      if (specsPresent.mayBeEmpty) {
         output.rules.isNot = null
       }
 
-      if (specs.min || specs.max) {
+      if (specsPresent.min || specsPresent.max) {
         output.rules.custom = (value: Date, {}) => {
           const checks = { min: true, max: true }
 
           const dateValue = new Date(value).getTime()
 
-          if (specs.min) {
+          if (specsPresent.min) {
             const minDate = new Date(field.item.specs.min as Date).getTime()
             if (dateValue < minDate) {
               checks.min = false
             }
           }
 
-          if (specs.max) {
+          if (specsPresent.max) {
             const maxDate = new Date(field.item.specs.max as Date).getTime()
             if (dateValue > maxDate) {
               checks.max = false
@@ -167,11 +167,11 @@ class KodzeroToValidnoParser {
       rules: {},
     }
 
-    const specs = {
+    const specsPresent = {
       mayBeEmpty: field.item.specs.mayBeEmpty === false,
     }
 
-    if (specs.mayBeEmpty) {
+    if (specsPresent.mayBeEmpty) {
       output.rules.isNot = ''
     }
 
@@ -262,7 +262,7 @@ class KodzeroToValidnoParser {
   static parseUrl(field: TableField<TableFieldUrl>) {
     const output: { type: StringConstructor; rules?: Record<string, unknown> } = { type: String }
 
-    const specs = {
+    const specsPresent = {
       allowedDomains:
         Array.isArray(field.item.specs.allowedDomains) &&
         field.item.specs.allowedDomains.length > 0,
@@ -271,16 +271,16 @@ class KodzeroToValidnoParser {
       mayBeEmpty: field.item.specs.mayBeEmpty === false,
     }
 
-    const hasSpecs = Object.values(specs).some((v) => v === true)
+    const hasSpecs = Object.values(specsPresent).some((v) => v === true)
 
     if (hasSpecs) {
       output.rules = {}
 
-      if (specs.mayBeEmpty) {
+      if (specsPresent.mayBeEmpty) {
         output.rules.isNot = ''
       }
 
-      if (specs.allowedDomains || specs.exceptDomains) {
+      if (specsPresent.allowedDomains || specsPresent.exceptDomains) {
         output.rules.custom = (value: string, {}) => {
           if (field.item.specs.mayBeEmpty && typeof value === 'string' && value.trim() === '') {
             return {
@@ -302,7 +302,7 @@ class KodzeroToValidnoParser {
 
           let allowed = true
 
-          if (specs.allowedDomains) {
+          if (specsPresent.allowedDomains) {
             const allowedDomainsLower = field.item.specs.allowedDomains.map((d: string) =>
               d.toLowerCase(),
             )
@@ -311,7 +311,7 @@ class KodzeroToValidnoParser {
             }
           }
 
-          if (specs.exceptDomains) {
+          if (specsPresent.exceptDomains) {
             const exceptDomainsLower = field.item.specs.exceptDomains.map((d: string) =>
               d.toLowerCase(),
             )
@@ -337,13 +337,15 @@ class KodzeroToValidnoParser {
         type: String,
       }
 
-    const specs = {
+    // Indicates which specs are present and should be processed, not the value!
+    // TODO: Refactor to be more clear
+    const specsPresent = {
       mayBeEmpty: field.item.specs.mayBeEmpty === false,
     }
 
     output.rules = {}
 
-    if (specs.mayBeEmpty) {
+    if (specsPresent.mayBeEmpty) {
       output.rules.isNot = ''
     }
 
@@ -365,10 +367,12 @@ class KodzeroToValidnoParser {
         output.rules.enum = field.item.specs.allowedValues
       }
 
-      if (field.item.specs.mayBeEmpty === true) {
+      if (specsPresent.mayBeEmpty) {
         if (!output.rules.enum) {
           output.rules.enum = []
         }
+
+        output.rules.lengthMin = 1
 
         ;(output.rules.enum as string[]).push('')
       }
