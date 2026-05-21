@@ -7,11 +7,14 @@ import TableFieldNumber from './types-constructors/number.js'
 import TableFieldSelect from './types-constructors/select.js'
 import TableFieldString from './types-constructors/string.js'
 import TableFieldUrl from './types-constructors/url.js'
+import TableFieldRelation from './types-constructors/relation.js'
+import TableFieldMarkdown from './types-constructors/markdown.js'
 import type {
   BooleanSpecs,
   DateSpecs,
   EmailSpecs,
   JsonSpecs,
+  MarkdownSpecs,
   NumberSpecs,
   RelationSpecs,
   SelectSpecs,
@@ -19,12 +22,12 @@ import type {
   UrlSpecs,
 } from './types.js'
 import generateSecret from '../utils/generate-secret.js'
-import TableFieldRelation from './types-constructors/relation.js'
 
 export type TableFieldAny =
   | TableFieldBoolean
   | TableFieldDate
   | TableFieldEmail
+  | TableFieldMarkdown
   | TableFieldJson
   | TableFieldNumber
   | TableFieldSelect
@@ -138,6 +141,8 @@ export class TableFieldCreator {
         return new TableFieldUrl(key, settings as Partial<UrlSpecs>)
       case 'relation':
         return new TableFieldRelation(key, settings as Partial<RelationSpecs>)
+      case 'markdown':
+        return new TableFieldMarkdown(key, settings as Partial<MarkdownSpecs>)
       default:
         throw new Error(`Unsupported config type: ${type}`)
     }
@@ -177,6 +182,10 @@ export class TableFieldCreator {
 
   static createRelation(key: string, settings: Partial<RelationSpecs> = {}) {
     return new TableFieldRelation(key, settings)
+  }
+
+  static createMarkdown(key: string, settings: Partial<MarkdownSpecs> = {}) {
+    return new TableFieldMarkdown(key, settings)
   }
 }
 

@@ -10,6 +10,7 @@ import { selectSpecsSchema } from "./types-constructors/select.js";
 import { urlSpecsSchema } from "./types-constructors/url.js";
 import { TableField, TableFieldAny } from "./types.js";
 import { relationSpecsSchema } from "./types-constructors/relation.js";
+import { markdownSpecsSchema } from "./types-constructors/markdown.js";
 
 const Checks: Record<string, {description: string, error: string}> = {
     'ok': {
@@ -139,6 +140,10 @@ class FieldValidator {
         return relationSpecsSchema.validate(input);
     }
 
+    static validateMarkdown(input: Record<string, any>) {
+        return markdownSpecsSchema.validate(input);
+    }
+
     static validateBase(input: Record<string, any>) {
         return baseSchema.validate(input);
     }
@@ -149,8 +154,6 @@ class FieldValidator {
 
     static validateSpecsAuto(type: string, specs: Record<string, any>) {
         switch (String(type)) {
-            case 'string':
-                return this.validateString(specs);
             case 'boolean':
                 return this.validateBoolean(specs);
             case 'date':
@@ -159,14 +162,18 @@ class FieldValidator {
                 return this.validateEmail(specs);
             case 'json':
                 return this.validateJson(specs);
+            case 'markdown':
+                return this.validateMarkdown(specs);
             case 'number':
                 return this.validateNumber(specs);
-            case 'select':
-                return this.validateSelect(specs);
-            case 'url':
-                return this.validateUrl(specs);
             case 'relation':
                 return this.validateRelation(specs);
+            case 'select':
+                return this.validateSelect(specs);
+            case 'string':
+                return this.validateString(specs);
+            case 'url':
+                return this.validateUrl(specs);
             default:
                 throw new Error(`Unknown field type: ${type}`);
         }

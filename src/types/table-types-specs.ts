@@ -19,6 +19,10 @@ export interface JsonSpecs {
   mayBeEmpty: boolean
 }
 
+export interface MarkdownSpecs {
+  mayBeEmpty: boolean
+}
+
 export interface NumberSpecs {
   min: number
   max: number

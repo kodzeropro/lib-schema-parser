@@ -7,6 +7,7 @@ import TableFieldSelect from './types-constructors/select.js'
 import TableFieldString from './types-constructors/string.js'
 import TableFieldUrl from './types-constructors/url.js'
 import TableFieldRelation from './types-constructors/relation.js'
+import TableFieldMarkdown from './fields-to-types/markdown.js'
 
 export type TableField<T = Record<string, unknown>> = {
   id: string
@@ -20,11 +21,12 @@ export type TableFieldAny =
   | TableFieldDate
   | TableFieldEmail
   | TableFieldJson
+  | TableFieldMarkdown
   | TableFieldNumber
+  | TableFieldRelation
   | TableFieldSelect
   | TableFieldString
   | TableFieldUrl
-  | TableFieldRelation
 
 export interface TableFieldItem<Specs = Record<string, unknown>> {
   key: string
@@ -55,9 +57,19 @@ export interface JsonSpecs {
   mayBeEmpty: boolean
 }
 
+export interface MarkdownSpecs {
+  mayBeEmpty: boolean
+}
+
 export interface NumberSpecs {
   min: number
   max: number
+  mayBeEmpty: boolean
+}
+
+export interface RelationSpecs {
+  collection: string
+  multiple: boolean
   mayBeEmpty: boolean
 }
 
@@ -77,11 +89,5 @@ export interface StringSpecs {
 export interface UrlSpecs {
   allowedDomains: string[]
   exceptDomains: string[]
-  mayBeEmpty: boolean
-}
-
-export interface RelationSpecs {
-  collection: string
-  multiple: boolean
   mayBeEmpty: boolean
 }
