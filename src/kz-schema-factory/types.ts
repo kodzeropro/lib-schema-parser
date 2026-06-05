@@ -1,6 +1,7 @@
 import TableFieldBoolean from './types-constructors/boolean.js'
 import TableFieldDate from './types-constructors/date.js'
 import TableFieldEmail from './types-constructors/email.js'
+import TableFieldFile from './types-constructors/file.js'
 import TableFieldJson from './types-constructors/json.js'
 import TableFieldNumber from './types-constructors/number.js'
 import TableFieldSelect from './types-constructors/select.js'
@@ -20,6 +21,7 @@ export type TableFieldAny =
   | TableFieldBoolean
   | TableFieldDate
   | TableFieldEmail
+  | TableFieldFile
   | TableFieldJson
   | TableFieldMarkdown
   | TableFieldNumber
@@ -50,6 +52,20 @@ export interface EmailSpecs {
   allowedDomains: string[]
   exceptDomains: string[]
   mayBeEmpty: boolean
+}
+
+export interface FileSpecs {
+  multiple: boolean
+  allowedMimeTypes: string[]
+  maxSize: number
+  mayBeEmpty: boolean
+}
+
+export interface AttachedFile {
+  path: string
+  name: string
+  mimeType: string
+  size: number
 }
 
 export interface JsonSpecs {
