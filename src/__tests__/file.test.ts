@@ -1,5 +1,15 @@
+import { describe, it, expect } from '@jest/globals';
+import { ObjectId } from 'bson';
 import KodzeroToValidnoParser from '../KodzeroToValidnoParser.js';
 import { TableField, TableFieldAny } from '../kz-schema-factory/types.js';
+
+const eachFileValidnoType = {
+    _id: { type: ObjectId },
+    path: { type: String },
+    name: { type: String },
+    mimeType: { type: String },
+    size: { type: Number },
+}
 
 describe('KodzeroToValidnoParser: file', () => {
     it('should parse basic file field without extra rules', () => {
@@ -23,11 +33,11 @@ describe('KodzeroToValidnoParser: file', () => {
         ]
 
         const validnoSchema = {
-            avatar: { type: Object },
+            avatar: {...eachFileValidnoType, rules: {}}
         }
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema);
-
+        
         expect(validnoSchema).toEqual(parsed)
     })
 
@@ -53,7 +63,7 @@ describe('KodzeroToValidnoParser: file', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
-        expect(parsed.document.type).toBe(Object)
+        expect(typeof parsed.document).toBe('object')
         expect(parsed.document.rules?.isNot).toBe(null)
         expect(typeof parsed.document.rules?.custom).toBe('function')
     })
@@ -107,7 +117,7 @@ describe('KodzeroToValidnoParser: file', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
-        expect(parsed.report.type).toBe(Object)
+        expect(typeof parsed.report).toBe('object')
         expect(parsed.report.rules?.isNot).toBe(null)
         expect(typeof parsed.report.rules?.custom).toBe('function')
 

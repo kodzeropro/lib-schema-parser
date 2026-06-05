@@ -1,7 +1,6 @@
 import Schema from 'validno'
-import type { TableFieldItem } from '../types.js'
+import type { MarkdownSpecs, TableFieldItem } from '../types.js'
 import validateInput from '../../utils/validate-input.js'
-import { MarkdownSpecs } from '../../types/table-types-specs.js'
 
 enum Constants {
   Name = 'markdown',

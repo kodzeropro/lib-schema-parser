@@ -1,4 +1,4 @@
-import type { TableField } from '../SchemaFactory.js'
+import { TableField } from '../types.js'
 import TableFieldDate from './date.js'
 
 export const autofieldCreatedAt: TableField<TableFieldDate> = {

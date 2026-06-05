@@ -1,4 +1,4 @@
-import type { TableField } from '../SchemaFactory.js'
+import { TableField } from '../types.js'
 import TableFieldString from './string.js'
 
 export const autofieldId: TableField<TableFieldString> = {
