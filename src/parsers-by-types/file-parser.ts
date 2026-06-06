@@ -1,16 +1,7 @@
-import { ObjectId } from 'bson'
 import TableFieldFile from "../kz-schema-factory/types-constructors/file.js";
 import { AttachedFile, TableField } from "../kz-schema-factory/types.js";
 
-const eachFileValidnoType = {
-    _id: { type: ObjectId },
-    path: { type: String },
-    name: { type: String },
-    mimeType: { type: String },
-    size: { type: Number },
-}
-
-  const isAttachedFile = (value: unknown): value is AttachedFile => {
+const isAttachedFile = (value: unknown): value is AttachedFile => {
     if (typeof value !== 'object' || value === null) {
       return false
     }
@@ -31,10 +22,10 @@ const parseFile = (field: TableField<TableFieldFile>) => {
     const isMultipleFile = field.item.specs.multiple === true
     const valueMayBeEmpty = field.item.specs.mayBeEmpty === true
 
-    const output = isMultipleFile === false ?
-        {...eachFileValidnoType, rules: {} as Record<string, any>} :
-        { type: Array, eachType: eachFileValidnoType, rules: {} as Record<string, any> }
-    
+    const output = {
+        type: isMultipleFile ? Array : Object,
+        rules: {} as Record<string, any>,
+    }
 
     const specsPresent = {
       multiple: field.item.specs.multiple === true,
@@ -44,15 +35,8 @@ const parseFile = (field: TableField<TableFieldFile>) => {
         Array.isArray(field.item.specs.allowedMimeTypes) && field.item.specs.allowedMimeTypes.length > 0,
     }
 
-    const hasSpecs = Object.values(specsPresent).some((v) => v === true)
-
-    if (!hasSpecs) return output
-    
-    output.rules = {}
-
     if (specsPresent.multiple) {
         output.type = Array
-        output.rules.eachType = Object
 
         if (valueMayBeEmpty === false) {
             output.rules.lengthNot = 0
@@ -93,35 +77,35 @@ const parseFile = (field: TableField<TableFieldFile>) => {
             }
         }
     } else {
-    if (specsPresent.mayBeEmpty) {
-        output.rules.isNot = null
-    }
+        if (specsPresent.mayBeEmpty) {
+            output.rules.isNot = null
+        }
 
-    output.rules.custom = (value: unknown, {}) => {
-        if (field.item.specs.mayBeEmpty && (value === null || value === undefined)) {
+        output.rules.custom = (value: unknown, {}) => {
+            if (field.item.specs.mayBeEmpty && (value === null || value === undefined)) {
+                return {
+                    result: true,
+                    details: '',
+                }
+            }
+
+            if (!isAttachedFile(value)) {
+                return {
+                    result: false,
+                    details: 'Invalid file value',
+                }
+            }
+
+            const allowedMimeTypes = field.item.specs.allowedMimeTypes.map((mime) => mime.toLowerCase())
+            const mimeTypeAllowed = !specsPresent.allowedMimeTypes || allowedMimeTypes.includes(value.mimeType.toLowerCase())
+            const sizeAllowed = !specsPresent.maxSize || value.size <= field.item.specs.maxSize
+            const isValid = mimeTypeAllowed && sizeAllowed
+
             return {
-                result: true,
-                details: '',
+                result: isValid,
+                details: isValid ? '' : 'File is invalid',
             }
         }
-
-        if (!isAttachedFile(value)) {
-            return {
-                result: false,
-                details: 'Invalid file value',
-            }
-        }
-
-        const allowedMimeTypes = field.item.specs.allowedMimeTypes.map((mime) => mime.toLowerCase())
-        const mimeTypeAllowed = !specsPresent.allowedMimeTypes || allowedMimeTypes.includes(value.mimeType.toLowerCase())
-        const sizeAllowed = !specsPresent.maxSize || value.size <= field.item.specs.maxSize
-        const isValid = mimeTypeAllowed && sizeAllowed
-
-        return {
-            result: isValid,
-            details: isValid ? '' : 'File is invalid',
-        }
-    }
     }
 
     return output

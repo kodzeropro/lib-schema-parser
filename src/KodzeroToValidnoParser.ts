@@ -1,4 +1,4 @@
-import { validations } from 'validno'
+import Schema, { validations } from 'validno'
 import {ObjectId} from 'bson'
 
 import isValidJSON from './utils/is-valid-json.js'

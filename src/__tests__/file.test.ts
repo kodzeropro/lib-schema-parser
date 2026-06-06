@@ -1,15 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { ObjectId } from 'bson';
 import KodzeroToValidnoParser from '../KodzeroToValidnoParser.js';
 import { TableField, TableFieldAny } from '../kz-schema-factory/types.js';
-
-const eachFileValidnoType = {
-    _id: { type: ObjectId },
-    path: { type: String },
-    name: { type: String },
-    mimeType: { type: String },
-    size: { type: Number },
-}
 
 describe('KodzeroToValidnoParser: file', () => {
     it('should parse basic file field without extra rules', () => {
@@ -32,13 +23,19 @@ describe('KodzeroToValidnoParser: file', () => {
             },
         ]
 
-        const validnoSchema = {
-            avatar: {...eachFileValidnoType, rules: {}}
-        }
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
-        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema);
-        
-        expect(validnoSchema).toEqual(parsed)
+        expect(parsed.avatar.type).toBe(Object)
+        expect(typeof parsed.avatar.rules?.custom).toBe('function')
+
+        const customValidator = parsed.avatar.rules?.custom as Function;
+        const validResult = customValidator(
+            { path: '/uploads/avatar.png', name: 'avatar.png', mimeType: 'image/png', size: 90 },
+            {},
+        );
+
+        expect(validResult.result).toBe(true)
+        expect(validResult.details).toBe('')
     })
 
     it('should parse required file field', () => {
@@ -91,7 +88,7 @@ describe('KodzeroToValidnoParser: file', () => {
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
         expect(parsed.attachments.type).toBe(Array)
-        expect(parsed.attachments.rules?.eachType).toBe(Object)
+        expect(parsed.attachments.rules?.eachType).toBeUndefined()
         expect(typeof parsed.attachments.rules?.custom).toBe('function')
     })
 
@@ -162,7 +159,7 @@ describe('KodzeroToValidnoParser: file', () => {
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
         expect(parsed.gallery.type).toBe(Array)
-        expect(parsed.gallery.rules?.eachType).toBe(Object)
+        expect(parsed.gallery.rules?.eachType).toBeUndefined()
         expect(parsed.gallery.rules?.lengthNot).toBe(0)
         expect(typeof parsed.gallery.rules?.custom).toBe('function')
 
