@@ -22,6 +22,14 @@ const parseFile = (field: TableField<TableFieldFile>) => {
     const isMultipleFile = field.item.specs.multiple === true
     const valueMayBeEmpty = field.item.specs.mayBeEmpty === true
 
+    const isAllowedEmptyValue = (value: unknown) => {
+        if (valueMayBeEmpty === false) {
+            return false
+        }
+
+        return value === null || value === undefined || (Array.isArray(value) && value.length === 0)
+    }
+
     const output = {
         type: isMultipleFile ? Array : Object,
         rules: {} as Record<string, any>,
@@ -43,17 +51,17 @@ const parseFile = (field: TableField<TableFieldFile>) => {
         }
 
         output.rules.custom = (value: unknown, {}) => {
+            if (isAllowedEmptyValue(value)) {
+                return {
+                    result: true,
+                    details: '',
+                }
+            }
+
             if (!Array.isArray(value)) {
                 return {
                     result: false,
                     details: 'Invalid file value',
-                }
-            }
-
-            if (field.item.specs.mayBeEmpty && value.length === 0) {
-                return {
-                    result: true,
-                    details: '',
                 }
             }
 
@@ -82,7 +90,7 @@ const parseFile = (field: TableField<TableFieldFile>) => {
         }
 
         output.rules.custom = (value: unknown, {}) => {
-            if (field.item.specs.mayBeEmpty && (value === null || value === undefined)) {
+            if (isAllowedEmptyValue(value)) {
                 return {
                     result: true,
                     details: '',

@@ -216,4 +216,68 @@ describe('KodzeroToValidnoParser: file', () => {
         expect(invalidResult.result).toBe(false)
         expect(invalidResult.details).toBe('Invalid file value')
     })
+
+    it('should pass null and empty array for optional single file field', () => {
+        const kodzeroSchema: TableField<TableFieldAny>[] = [
+            {
+                id: 'xxx',
+                order: 1,
+                isAuto: false,
+                item: {
+                    key: 'optionalAttachment',
+                    type: 'file',
+                    title: 'Optional Attachment',
+                    specs: {
+                        multiple: false,
+                        maxSize: 0,
+                        mayBeEmpty: true,
+                        allowedMimeTypes: [],
+                    }
+                }
+            },
+        ]
+
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const customValidator = parsed.optionalAttachment.rules?.custom as Function;
+
+        const nullResult = customValidator(null, {});
+        const emptyArrayResult = customValidator([], {});
+
+        expect(nullResult.result).toBe(true)
+        expect(nullResult.details).toBe('')
+        expect(emptyArrayResult.result).toBe(true)
+        expect(emptyArrayResult.details).toBe('')
+    })
+
+    it('should pass null and empty array for optional multiple file field', () => {
+        const kodzeroSchema: TableField<TableFieldAny>[] = [
+            {
+                id: 'xxx',
+                order: 1,
+                isAuto: false,
+                item: {
+                    key: 'optionalAttachments',
+                    type: 'file',
+                    title: 'Optional Attachments',
+                    specs: {
+                        multiple: true,
+                        maxSize: 0,
+                        mayBeEmpty: true,
+                        allowedMimeTypes: [],
+                    }
+                }
+            },
+        ]
+
+        const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
+        const customValidator = parsed.optionalAttachments.rules?.custom as Function;
+
+        const nullResult = customValidator(null, {});
+        const emptyArrayResult = customValidator([], {});
+
+        expect(nullResult.result).toBe(true)
+        expect(nullResult.details).toBe('')
+        expect(emptyArrayResult.result).toBe(true)
+        expect(emptyArrayResult.details).toBe('')
+    })
 })
