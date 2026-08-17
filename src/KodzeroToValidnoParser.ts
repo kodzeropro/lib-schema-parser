@@ -256,10 +256,15 @@ class KodzeroToValidnoParser {
 
     const output: {
       type: StringConstructor | ArrayConstructor | typeof ObjectId;
+      required?: boolean
       rules?: Record<string, unknown>
     } = { type: String }
 
     output.rules = {}
+
+    if (field.item.specs.mayBeEmpty === true) {
+      output.required = false
+    }
 
     if (field.item.specs.multiple) {
       output.type = Array
