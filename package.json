@@ -1,6 +1,6 @@
 {
   "name": "kodzero-schema-parser",
-  "version": "0.0.79-beta.6",
+  "version": "0.0.79-beta.7",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
