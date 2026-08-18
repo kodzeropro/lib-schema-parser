@@ -25,7 +25,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.basicRelation.type).toBe(String)
+        expect(parsed.basicRelation.type).toEqual([String, null])
         expect(parsed.basicRelation.rules).toBeDefined()
     })
 
@@ -74,7 +74,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.singleRelation.type).toBe(String)
+        expect(parsed.singleRelation.type).toEqual([String, null])
         expect(parsed.singleRelation.rules).toBeDefined()
     })
 
@@ -219,8 +219,8 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.userRelation.type).toBe(String)
-        expect(parsed.categoryRelation.type).toBe(String)
+        expect(parsed.userRelation.type).toEqual([String, null])
+        expect(parsed.categoryRelation.type).toEqual([String, null])
     })
 
     it('should parse multiple relation fields with different specs', () => {
@@ -290,7 +290,7 @@ describe('KodzeroToValidnoParser: relation', () => {
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         // Optional Single
-        expect(parsed.optionalSingleRelation.type).toBe(String)
+        expect(parsed.optionalSingleRelation.type).toEqual([String, null])
         expect(parsed.optionalSingleRelation.rules?.custom).toBeDefined()
 
         // Required Single
@@ -330,7 +330,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.emptyCollectionRelation.type).toBe(String)
+        expect(parsed.emptyCollectionRelation.type).toEqual([String, null])
     })
 
     it('should preserve specs combination - required multiple relation', () => {
@@ -382,8 +382,8 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        // Should have String type with no rules
-        expect(parsed.defaultRelation.type).toBe(String)
+        // Should have nullable String type with custom rules
+        expect(parsed.defaultRelation.type).toEqual([String, null])
         expect(parsed.defaultRelation.rules.custom).toBeDefined()
     })
 
@@ -553,7 +553,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
             const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
 
-            expect(parsed.singleRelation.type).toBe(ObjectId)
+            expect(parsed.singleRelation.type).toEqual([ObjectId, null])
             expect(parsed.singleRelation.rules).toBeDefined()
             expect(parsed.singleRelation.rules.custom).toBeDefined()
         })
@@ -606,7 +606,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
             // Should default to ObjectId (backend mode)
-            expect(parsed.defaultRelation.type).toBe(ObjectId)
+            expect(parsed.defaultRelation.type).toEqual([ObjectId, null])
         })
 
         it('should handle required single relation as ObjectId', () => {
@@ -683,7 +683,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
             const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-            expect(parsed.singleRelation.type).toBe(String)
+            expect(parsed.singleRelation.type).toEqual([String, null])
             expect(parsed.singleRelation.rules).toBeDefined()
             expect(parsed.singleRelation.rules.custom).toBeDefined()
         })
@@ -1009,7 +1009,7 @@ describe('KodzeroToValidnoParser: relation', () => {
         it('should parse the user-defined relation field', () => {
             const parsed = KodzeroToValidnoParser.parseSchema(collectionFields) as any
 
-            expect(parsed.relation.type).toBe(ObjectId)
+            expect(parsed.relation.type).toEqual([ObjectId, null])
             expect(parsed._id).toBeUndefined()
         })
 

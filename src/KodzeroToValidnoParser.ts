@@ -255,7 +255,11 @@ class KodzeroToValidnoParser {
     const relationAsObjectId = options.relationAsObjectId ?? true
 
     const output: {
-      type: StringConstructor | ArrayConstructor | typeof ObjectId;
+      type:
+        | StringConstructor
+        | ArrayConstructor
+        | typeof ObjectId
+        | [StringConstructor | typeof ObjectId, null];
       required?: boolean
       rules?: Record<string, unknown>
     } = { type: String }
@@ -288,15 +292,19 @@ class KodzeroToValidnoParser {
     } else {
       output.type = relationAsObjectId ? ObjectId : String
 
+      if (field.item.specs.mayBeEmpty === true) {
+        output.type = [output.type, null]
+      }
+
       output.rules.custom = (value: unknown, {}) => {
-        if (value === null || value === undefined) {
+        if (field.item.specs.mayBeEmpty !== true && (value === null || value === undefined)) {
           return {
             result: false,
-            details: 'ID is invalid'
+            details: 'Invalid _id'
           } 
         }
         
-        const valueAsString = typeof value === 'string' ? value : value.toString()
+        const valueAsString = typeof value === 'string' ? value : value?.toString() || value
 
         if (field.item.specs.mayBeEmpty && (typeof valueAsString === 'string' && valueAsString.length === 0)) {
           return {
@@ -309,7 +317,7 @@ class KodzeroToValidnoParser {
 
         return {
           result: stringLength24,
-          details: stringLength24 ? '' : 'ID is invalid',
+          details: stringLength24 ? '' : 'Invalid _id',
         }
       }
     }
