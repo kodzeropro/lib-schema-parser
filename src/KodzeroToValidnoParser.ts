@@ -313,6 +313,13 @@ class KodzeroToValidnoParser {
           }
         }
 
+        if (field.item.specs.mayBeEmpty && value === null) {
+          return {
+            result: true,
+            details: '',
+          }
+        }
+
         const stringLength24 = typeof valueAsString === 'string' && valueAsString.length === 24
 
         return {
