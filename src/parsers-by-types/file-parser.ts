@@ -30,9 +30,12 @@ const parseFile = (field: TableField<TableFieldFile>) => {
         return value === null || value === undefined || (Array.isArray(value) && value.length === 0)
     }
 
-    const output = {
+    const output: {
+        type: any,
+        rules: Record<string, any>,
+    } = {
         type: isMultipleFile ? Array : Object,
-        rules: {} as Record<string, any>,
+        rules: {},
     }
 
     const specsPresent = {
@@ -44,7 +47,7 @@ const parseFile = (field: TableField<TableFieldFile>) => {
     }
 
     if (specsPresent.multiple) {
-        output.type = Array
+        output.type = valueMayBeEmpty ? [Array, null] : Array
 
         if (valueMayBeEmpty === false) {
             output.rules.lengthNot = 0
@@ -85,6 +88,8 @@ const parseFile = (field: TableField<TableFieldFile>) => {
             }
         }
     } else {
+        output.type = valueMayBeEmpty ? [Object, Array, null] : Object
+
         if (specsPresent.mayBeEmpty) {
             output.rules.isNot = null
         }
