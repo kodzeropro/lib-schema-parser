@@ -46,6 +46,7 @@ export interface DateSpecs {
   min: Date | null
   max: Date | null
   mayBeEmpty: boolean
+  noTimezone?: boolean
 }
 
 export interface EmailSpecs {

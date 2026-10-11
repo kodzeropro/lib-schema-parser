@@ -12,6 +12,7 @@ const defaultSpecs = (): DateSpecs => {
     min: null,
     max: null,
     mayBeEmpty: true,
+    noTimezone: false,
   }
 }
 
@@ -25,6 +26,10 @@ export const dateSpecsSchema = new Schema({
     required: false,
   },
   mayBeEmpty: {
+    type: Boolean,
+    required: false,
+  },
+  noTimezone: {
     type: Boolean,
     required: false,
   },
@@ -47,6 +52,7 @@ class TableFieldDate implements TableFieldItem<DateSpecs> {
       min: combinedSettings.min,
       max: combinedSettings.max,
       mayBeEmpty: combinedSettings.mayBeEmpty,
+      noTimezone: combinedSettings.noTimezone,
     }
   }
 }

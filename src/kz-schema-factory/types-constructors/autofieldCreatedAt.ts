@@ -11,6 +11,7 @@ export const autofieldCreatedAt: TableField<TableFieldDate> = {
       max: null,
       min: null,
       mayBeEmpty: true,
+      noTimezone: false,
     },
   },
   isAuto: true,

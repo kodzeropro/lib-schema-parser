@@ -1,7 +1,16 @@
 import KodzeroToValidnoParser from '../KodzeroToValidnoParser.js';
 import { TableField, TableFieldAny } from '../kz-schema-factory/types.js';
+import TableFieldDate from '../kz-schema-factory/types-constructors/date.js';
 
 describe('KodzeroToValidnoParser: date', () => {
+    it('should preserve the noTimezone date setting', () => {
+        const dateField = new TableFieldDate('dateWithoutTimezone', { noTimezone: true });
+        expect(dateField.specs.noTimezone).toBe(true);
+
+        const defaultDateField = new TableFieldDate('dateWithTimezone');
+        expect(defaultDateField.specs.noTimezone).toBe(false);
+    })
+
     it('should parse basic date field without specs', () => {
         const kodzeroSchema: TableField<TableFieldAny>[] = [
             {
