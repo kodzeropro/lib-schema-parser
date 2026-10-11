@@ -1,3 +1,4 @@
+import Schema from 'validno';
 import KodzeroToValidnoParser from '../KodzeroToValidnoParser.js';
 import { TableField, TableFieldAny } from '../kz-schema-factory/types.js';
 import { ObjectId } from 'bson';
@@ -24,7 +25,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.basicRelation.type).toBe(String)
+        expect(parsed.basicRelation.type).toEqual([String, null])
         expect(parsed.basicRelation.rules).toBeDefined()
     })
 
@@ -73,7 +74,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.singleRelation.type).toBe(String)
+        expect(parsed.singleRelation.type).toEqual([String, null])
         expect(parsed.singleRelation.rules).toBeDefined()
     })
 
@@ -218,8 +219,8 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.userRelation.type).toBe(String)
-        expect(parsed.categoryRelation.type).toBe(String)
+        expect(parsed.userRelation.type).toEqual([String, null])
+        expect(parsed.categoryRelation.type).toEqual([String, null])
     })
 
     it('should parse multiple relation fields with different specs', () => {
@@ -289,7 +290,7 @@ describe('KodzeroToValidnoParser: relation', () => {
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
         // Optional Single
-        expect(parsed.optionalSingleRelation.type).toBe(String)
+        expect(parsed.optionalSingleRelation.type).toEqual([String, null])
         expect(parsed.optionalSingleRelation.rules?.custom).toBeDefined()
 
         // Required Single
@@ -329,7 +330,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        expect(parsed.emptyCollectionRelation.type).toBe(String)
+        expect(parsed.emptyCollectionRelation.type).toEqual([String, null])
     })
 
     it('should preserve specs combination - required multiple relation', () => {
@@ -381,8 +382,8 @@ describe('KodzeroToValidnoParser: relation', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-        // Should have String type with no rules
-        expect(parsed.defaultRelation.type).toBe(String)
+        // Should have nullable String type with custom rules
+        expect(parsed.defaultRelation.type).toEqual([String, null])
         expect(parsed.defaultRelation.rules.custom).toBeDefined()
     })
 
@@ -552,7 +553,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
             const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: true }) as any;
 
-            expect(parsed.singleRelation.type).toBe(ObjectId)
+            expect(parsed.singleRelation.type).toEqual([ObjectId, null])
             expect(parsed.singleRelation.rules).toBeDefined()
             expect(parsed.singleRelation.rules.custom).toBeDefined()
         })
@@ -605,7 +606,7 @@ describe('KodzeroToValidnoParser: relation', () => {
             const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
             // Should default to ObjectId (backend mode)
-            expect(parsed.defaultRelation.type).toBe(ObjectId)
+            expect(parsed.defaultRelation.type).toEqual([ObjectId, null])
         })
 
         it('should handle required single relation as ObjectId', () => {
@@ -682,7 +683,7 @@ describe('KodzeroToValidnoParser: relation', () => {
 
             const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId: false }) as any;
 
-            expect(parsed.singleRelation.type).toBe(String)
+            expect(parsed.singleRelation.type).toEqual([String, null])
             expect(parsed.singleRelation.rules).toBeDefined()
             expect(parsed.singleRelation.rules.custom).toBeDefined()
         })
@@ -868,6 +869,383 @@ describe('KodzeroToValidnoParser: relation', () => {
             // Both modes should allow empty arrays when mayBeEmpty is true
             expect(validatorString([], {}).result).toBe(true)
             expect(validatorObjectId([], {}).result).toBe(true)
+        })
+    })
+
+    describe('mayBeEmpty: true — empty values must pass full schema validation', () => {
+        const buildSchema = (multiple: boolean, relationAsObjectId: boolean) => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'optionalRelation',
+                        type: 'relation',
+                        title: 'Optional Relation',
+                        specs: {
+                            collection: 'users',
+                            multiple,
+                            mayBeEmpty: true,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId }) as any
+            return new Schema(parsed)
+        }
+
+        it.each([
+            ['relationAsObjectId: false', false],
+            ['relationAsObjectId: true', true],
+        ])('single relation, %s: accepts undefined and missing key', (_label, relationAsObjectId) => {
+            const schema = buildSchema(false, relationAsObjectId as boolean)
+
+            expect(schema.validate({ optionalRelation: undefined }).ok).toBe(true)
+            expect(schema.validate({}).ok).toBe(true)
+        })
+
+        it('single relation, relationAsObjectId: true: rejects an empty string', () => {
+            const schema = buildSchema(false, true)
+
+            expect(schema.validate({ optionalRelation: '' }).ok).toBe(false)
+        })
+
+        // Legacy behaviour of the String mode: '' is still treated as an allowed empty value.
+        it('single relation, relationAsObjectId: false: accepts an empty string', () => {
+            const schema = buildSchema(false, false)
+
+            expect(schema.validate({ optionalRelation: '' }).ok).toBe(true)
+        })
+
+        it.each([
+            ['relationAsObjectId: false', false],
+            ['relationAsObjectId: true', true],
+        ])('single relation, %s: still accepts a valid id', (_label, relationAsObjectId) => {
+            const schema = buildSchema(false, relationAsObjectId as boolean)
+            const id = '507f1f77bcf86cd799439011'
+
+            expect(schema.validate({ optionalRelation: relationAsObjectId ? new ObjectId(id) : id }).ok).toBe(true)
+        })
+
+        it.each([
+            ['relationAsObjectId: false', false],
+            ['relationAsObjectId: true', true],
+        ])('multiple relation, %s: accepts empty array, undefined and missing key', (_label, relationAsObjectId) => {
+            const schema = buildSchema(true, relationAsObjectId as boolean)
+
+            expect(schema.validate({ optionalRelation: [] }).ok).toBe(true)
+            expect(schema.validate({ optionalRelation: undefined }).ok).toBe(true)
+            expect(schema.validate({}).ok).toBe(true)
+        })
+    })
+
+    describe('real collection "rel-user-pub" schema', () => {
+        // Mirrors the stored fields of collection p10067_c100128 (numId 100128).
+        const collectionFields: TableField<TableFieldAny>[] = [
+            {
+                id: '7FonaWThh5jq',
+                order: 0,
+                item: {
+                    key: 'relation',
+                    type: 'relation',
+                    title: 'Связь',
+                    specs: {
+                        collection: 'p10067_c901',
+                        multiple: false,
+                        mayBeEmpty: true,
+                    }
+                }
+            },
+            {
+                id: 'autofield-id',
+                order: 1,
+                isAuto: true,
+                item: {
+                    key: '_id',
+                    type: 'string',
+                    title: 'ID',
+                    specs: {
+                        lengthMax: 24,
+                        lengthMin: 24,
+                        mayBeEmpty: false,
+                        pattern: null,
+                    }
+                }
+            },
+            {
+                id: 'autofield-workspace',
+                order: 2,
+                isAuto: true,
+                item: {
+                    key: '_workspace',
+                    type: 'relation',
+                    title: 'Workspace',
+                    specs: {
+                        collection: '',
+                        multiple: false,
+                        mayBeEmpty: true,
+                    }
+                }
+            },
+            {
+                id: 'autofield-user',
+                order: 3,
+                isAuto: true,
+                item: {
+                    key: '_user',
+                    type: 'relation',
+                    title: 'User ID',
+                    specs: {
+                        collection: '',
+                        multiple: false,
+                        mayBeEmpty: true,
+                    }
+                }
+            },
+        ] as unknown as TableField<TableFieldAny>[]
+
+        it('should parse the user-defined relation field', () => {
+            const parsed = KodzeroToValidnoParser.parseSchema(collectionFields) as any
+
+            expect(parsed.relation.type).toEqual([ObjectId, null])
+            expect(parsed._id).toBeUndefined()
+        })
+
+        it('should accept a document with the relation filled', () => {
+            const parsed = KodzeroToValidnoParser.parseSchema(collectionFields) as any
+            const schema = new Schema(parsed)
+
+            const result = schema.validate({
+                relation: new ObjectId('507f1f77bcf86cd799439011'),
+                _workspace: new ObjectId('697e767b5d0f883e18718b33'),
+                _user: new ObjectId('697e767b5d0f883e18718b32'),
+            })
+
+            expect(result.ok).toBe(true)
+        })
+
+        it('should accept a document with the mayBeEmpty relation omitted', () => {
+            const parsed = KodzeroToValidnoParser.parseSchema(collectionFields) as any
+            const schema = new Schema(parsed)
+
+            const undefinedResult = schema.validate({
+                relation: undefined,
+                _workspace: new ObjectId('697e767b5d0f883e18718b33'),
+                _user: new ObjectId('697e767b5d0f883e18718b32'),
+            })
+
+            const omittedResult = schema.validate({
+                _workspace: new ObjectId('697e767b5d0f883e18718b33'),
+                _user: new ObjectId('697e767b5d0f883e18718b32'),
+            })
+
+            expect(undefinedResult.errors).toEqual([])
+            expect(undefinedResult.ok).toBe(true)
+            expect(omittedResult.ok).toBe(true)
+        })
+
+        it('should reject an empty string in a mayBeEmpty relation', () => {
+            const parsed = KodzeroToValidnoParser.parseSchema(collectionFields) as any
+            const schema = new Schema(parsed)
+
+            const result = schema.validate({
+                relation: '',
+                _workspace: new ObjectId('697e767b5d0f883e18718b33'),
+                _user: new ObjectId('697e767b5d0f883e18718b32'),
+            })
+
+            expect(result.ok).toBe(false)
+        })
+
+        it('should reject an invalid id in a mayBeEmpty relation', () => {
+            const parsed = KodzeroToValidnoParser.parseSchema(collectionFields) as any
+            const schema = new Schema(parsed)
+
+            const result = schema.validate({
+                relation: 'not-an-id',
+                _workspace: new ObjectId('697e767b5d0f883e18718b33'),
+                _user: new ObjectId('697e767b5d0f883e18718b32'),
+            })
+
+            expect(result.ok).toBe(false)
+        })
+    })
+
+    describe('real value validation through Schema.validate', () => {
+        const validId = '507f1f77bcf86cd799439011'
+        const secondValidId = '507f191e810c19729de860ea'
+
+        const buildSchema = (
+            specs: { multiple: boolean; mayBeEmpty: boolean },
+            relationAsObjectId: boolean,
+        ) => {
+            const kodzeroSchema: TableField<TableFieldAny>[] = [
+                {
+                    id: 'xxx',
+                    order: 1,
+                    isAuto: false,
+                    item: {
+                        key: 'rel',
+                        type: 'relation',
+                        title: 'Relation',
+                        specs: {
+                            collection: 'users',
+                            multiple: specs.multiple,
+                            mayBeEmpty: specs.mayBeEmpty,
+                        }
+                    }
+                },
+            ]
+
+            const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema, { relationAsObjectId }) as any
+
+            return new Schema(parsed)
+        }
+
+        describe('single relation, mayBeEmpty: true, relationAsObjectId: true', () => {
+            const schema = () => buildSchema({ multiple: false, mayBeEmpty: true }, true)
+
+            it('accepts null', () => {
+                const result = schema().validate({ rel: null })
+
+                expect(result.errors).toEqual([])
+                expect(result.ok).toBe(true)
+            })
+
+            it('accepts undefined and a missing key', () => {
+                expect(schema().validate({ rel: undefined }).ok).toBe(true)
+                expect(schema().validate({}).ok).toBe(true)
+            })
+
+            it('accepts a valid ObjectId', () => {
+                expect(schema().validate({ rel: new ObjectId(validId) }).ok).toBe(true)
+            })
+
+            it('rejects an empty string', () => {
+                expect(schema().validate({ rel: '' }).ok).toBe(false)
+            })
+
+            it('rejects a malformed id', () => {
+                expect(schema().validate({ rel: 'not-an-id' }).ok).toBe(false)
+            })
+
+            it('rejects a number', () => {
+                expect(schema().validate({ rel: 123 }).ok).toBe(false)
+            })
+        })
+
+        describe('single relation, mayBeEmpty: true, relationAsObjectId: false', () => {
+            const schema = () => buildSchema({ multiple: false, mayBeEmpty: true }, false)
+
+            it('accepts null', () => {
+                const result = schema().validate({ rel: null })
+
+                expect(result.errors).toEqual([])
+                expect(result.ok).toBe(true)
+            })
+
+            it('accepts an empty string', () => {
+                expect(schema().validate({ rel: '' }).ok).toBe(true)
+            })
+
+            it('accepts a valid 24-char id string', () => {
+                expect(schema().validate({ rel: validId }).ok).toBe(true)
+            })
+
+            it('rejects a too short id string', () => {
+                expect(schema().validate({ rel: 'short' }).ok).toBe(false)
+            })
+        })
+
+        describe('single relation, mayBeEmpty: false, relationAsObjectId: true', () => {
+            const schema = () => buildSchema({ multiple: false, mayBeEmpty: false }, true)
+
+            it('accepts a valid ObjectId', () => {
+                expect(schema().validate({ rel: new ObjectId(validId) }).ok).toBe(true)
+            })
+
+            it('rejects null', () => {
+                expect(schema().validate({ rel: null }).ok).toBe(false)
+            })
+
+            it('rejects a missing key', () => {
+                expect(schema().validate({}).ok).toBe(false)
+            })
+        })
+
+        describe('single relation, mayBeEmpty: false, relationAsObjectId: false', () => {
+            const schema = () => buildSchema({ multiple: false, mayBeEmpty: false }, false)
+
+            it('accepts a valid 24-char id string', () => {
+                expect(schema().validate({ rel: validId }).ok).toBe(true)
+            })
+
+            it('rejects null', () => {
+                expect(schema().validate({ rel: null }).ok).toBe(false)
+            })
+
+            it('rejects an empty string', () => {
+                expect(schema().validate({ rel: '' }).ok).toBe(false)
+            })
+        })
+
+        describe('multiple relation, mayBeEmpty: true, relationAsObjectId: true', () => {
+            const schema = () => buildSchema({ multiple: true, mayBeEmpty: true }, true)
+
+            it('accepts an empty array', () => {
+                expect(schema().validate({ rel: [] }).ok).toBe(true)
+            })
+
+            it('accepts an array of valid ObjectIds', () => {
+                const result = schema().validate({
+                    rel: [new ObjectId(validId), new ObjectId(secondValidId)],
+                })
+
+                expect(result.errors).toEqual([])
+                expect(result.ok).toBe(true)
+            })
+
+            it('rejects an array containing a malformed id', () => {
+                expect(schema().validate({ rel: [new ObjectId(validId), 'not-an-id'] }).ok).toBe(false)
+            })
+
+            it('rejects a non-array value', () => {
+                expect(schema().validate({ rel: new ObjectId(validId) }).ok).toBe(false)
+            })
+        })
+
+        describe('multiple relation, mayBeEmpty: true, relationAsObjectId: false', () => {
+            const schema = () => buildSchema({ multiple: true, mayBeEmpty: true }, false)
+
+            it('accepts an empty array', () => {
+                expect(schema().validate({ rel: [] }).ok).toBe(true)
+            })
+
+            it('accepts an array of valid id strings', () => {
+                expect(schema().validate({ rel: [validId, secondValidId] }).ok).toBe(true)
+            })
+
+            it('rejects an array containing an empty string', () => {
+                expect(schema().validate({ rel: [validId, ''] }).ok).toBe(false)
+            })
+        })
+
+        describe('multiple relation, mayBeEmpty: false, relationAsObjectId: false', () => {
+            const schema = () => buildSchema({ multiple: true, mayBeEmpty: false }, false)
+
+            it('accepts an array of valid id strings', () => {
+                expect(schema().validate({ rel: [validId] }).ok).toBe(true)
+            })
+
+            it('rejects a missing key', () => {
+                expect(schema().validate({}).ok).toBe(false)
+            })
+
+            it('rejects an array containing a malformed id', () => {
+                expect(schema().validate({ rel: ['nope'] }).ok).toBe(false)
+            })
         })
     })
 })

@@ -1,4 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
+import Schema from 'validno';
 import KodzeroToValidnoParser from '../KodzeroToValidnoParser.js';
 import { TableField, TableFieldAny } from '../kz-schema-factory/types.js';
 
@@ -25,7 +26,7 @@ describe('KodzeroToValidnoParser: file', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
-        expect(parsed.avatar.type).toBe(Object)
+        expect(parsed.avatar.type).toEqual([Object, Array, null])
         expect(typeof parsed.avatar.rules?.custom).toBe('function')
 
         const customValidator = parsed.avatar.rules?.custom as Function;
@@ -87,7 +88,7 @@ describe('KodzeroToValidnoParser: file', () => {
 
         const parsed = KodzeroToValidnoParser.parseSchema(kodzeroSchema) as any;
 
-        expect(parsed.attachments.type).toBe(Array)
+        expect(parsed.attachments.type).toEqual([Array, null])
         expect(parsed.attachments.rules?.eachType).toBeUndefined()
         expect(typeof parsed.attachments.rules?.custom).toBe('function')
     })
@@ -243,10 +244,16 @@ describe('KodzeroToValidnoParser: file', () => {
         const nullResult = customValidator(null, {});
         const emptyArrayResult = customValidator([], {});
 
+        const schema = new Schema(parsed)
+        const schemaNullResult = schema.validate({ optionalAttachment: null })
+        const schemaEmptyArrayResult = schema.validate({ optionalAttachment: [] })
+
         expect(nullResult.result).toBe(true)
         expect(nullResult.details).toBe('')
         expect(emptyArrayResult.result).toBe(true)
         expect(emptyArrayResult.details).toBe('')
+        expect(schemaNullResult.ok).toBe(true)
+        expect(schemaEmptyArrayResult.ok).toBe(true)
     })
 
     it('should pass null and empty array for optional multiple file field', () => {
@@ -275,9 +282,15 @@ describe('KodzeroToValidnoParser: file', () => {
         const nullResult = customValidator(null, {});
         const emptyArrayResult = customValidator([], {});
 
+        const schema = new Schema(parsed)
+        const schemaNullResult = schema.validate({ optionalAttachments: null })
+        const schemaEmptyArrayResult = schema.validate({ optionalAttachments: [] })
+
         expect(nullResult.result).toBe(true)
         expect(nullResult.details).toBe('')
         expect(emptyArrayResult.result).toBe(true)
         expect(emptyArrayResult.details).toBe('')
+        expect(schemaNullResult.ok).toBe(true)
+        expect(schemaEmptyArrayResult.ok).toBe(true)
     })
 })
